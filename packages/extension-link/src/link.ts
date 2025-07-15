@@ -187,6 +187,17 @@ export function isAllowedUri(uri: string | undefined, protocols?: LinkOptions['p
   )
 }
 
+export function getEffectiveLinkHref(href: string | null | undefined, opts: LinkOptions): string | null {
+  if (!href) {
+    return null
+  }
+
+  if (href.includes('://')) {
+    return href
+  }
+  return `${opts.defaultProtocol}://${href}`
+}
+
 /**
  * This extension allows you to create links.
  * @see https://www.tiptap.dev/api/marks/link
@@ -299,7 +310,11 @@ export const Link = Mark.create<LinkOptions>({
       return ['a', mergeAttributes(this.options.HTMLAttributes, { ...HTMLAttributes, href: '' }), 0]
     }
 
-    return ['a', mergeAttributes(this.options.HTMLAttributes, HTMLAttributes), 0]
+    const effectiveHTMLAttributes = {
+      ...HTMLAttributes,
+      href: getEffectiveLinkHref(HTMLAttributes.href, this.options),
+    }
+    return ['a', mergeAttributes(this.options.HTMLAttributes, effectiveHTMLAttributes), 0]
   },
 
   addCommands() {
