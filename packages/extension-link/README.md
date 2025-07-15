@@ -16,3 +16,6 @@ Documentation can be found on the [Tiptap website](https://tiptap.dev).
 ## License
 
 Tiptap is open sourced software licensed under the [MIT license](https://github.com/ueberdosis/tiptap/blob/main/LICENSE.md).
+
+## Fork
+Publish using `pnpm publish --access public --no-git-checks`.
