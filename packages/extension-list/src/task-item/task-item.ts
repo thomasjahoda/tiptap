@@ -7,9 +7,9 @@ export interface TaskItemOptions {
    * A callback function that is called when the checkbox is clicked while the editor is in readonly mode.
    * @param node The prosemirror node of the task item
    * @param checked The new checked state
-   * @returns boolean
+   * @returns boolean whether the change to the checkbox state should be accepted or reverted - or whether the editor content should be updated
    */
-  onReadOnlyChecked?: (node: ProseMirrorNode, checked: boolean) => boolean
+  onReadOnlyChecked?: (node: ProseMirrorNode, checked: boolean) => boolean | 'updateEditorContent'
 
   /**
    * Controls whether the task items can be nested or not.
@@ -191,8 +191,31 @@ export const TaskItem = Node.create<TaskItemOptions>({
         }
         if (!editor.isEditable && this.options.onReadOnlyChecked) {
           // Reset state if onReadOnlyChecked returns false
-          if (!this.options.onReadOnlyChecked(node, checked)) {
+          const result = this.options.onReadOnlyChecked(node, checked)
+          if (result === false) {
             checkbox.checked = !checkbox.checked
+          } else if (result === true) {
+            // simply accept the change and do nothing
+          } else if (result === 'updateEditorContent') {
+            // update the editor content to reflect the change
+            editor
+              .chain()
+              .command(({ tr }) => {
+                const position = getPos()
+
+                if (typeof position !== 'number') {
+                  return false
+                }
+                const currentNode = tr.doc.nodeAt(position)
+
+                tr.setNodeMarkup(position, undefined, {
+                  ...currentNode?.attrs,
+                  checked,
+                })
+
+                return true
+              })
+              .run()
           }
         }
       })
