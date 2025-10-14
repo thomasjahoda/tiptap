@@ -2,12 +2,18 @@ import React from 'react'
 
 import { useReactNodeView } from './useReactNodeView.js'
 
-export interface NodeViewWrapperProps {
-  [key: string]: any
-  as?: React.ElementType
-}
+export type NodeViewWrapperProps =
+  | {
+      [Key in keyof React.JSX.IntrinsicElements]?: React.JSX.IntrinsicElements[Key] & {
+        // as: React__default.ElementType<any, Key>;
+        as: Key
+      }
+    }[keyof React.JSX.IntrinsicElements]
+  | (React.JSX.IntrinsicElements['div'] & {
+      as?: undefined
+    })
 
-export const NodeViewWrapper: React.FC<NodeViewWrapperProps> = React.forwardRef((props, ref) => {
+export const NodeViewWrapper: React.FC<NodeViewWrapperProps> = React.forwardRef((props: any, ref: any) => {
   const { onDragStart } = useReactNodeView()
   const Tag = props.as || 'div'
 
@@ -24,4 +30,4 @@ export const NodeViewWrapper: React.FC<NodeViewWrapperProps> = React.forwardRef(
       }}
     />
   )
-})
+}) as any

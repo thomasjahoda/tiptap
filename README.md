@@ -130,3 +130,9 @@ Feel like adding some magic of your own to Tiptap Editor Core? We welcome contri
 ## License
 
 The MIT License (MIT). Please see [License File](LICENSE.md) for more information.
+
+## Fork
+Change package name, then build and publish using: ```
+cd packages/<package-name>
+tsup && pnpm publish --access public --no-git-checks
+```

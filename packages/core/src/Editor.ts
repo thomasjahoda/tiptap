@@ -667,6 +667,7 @@ export class Editor extends EventEmitter<EditorEvents> {
 
   /**
    * Get the document as JSON.
+   * WARNING: This mutates the previously returned result. At least properties like `attrs` will be directly mutated by Prosemirror.
    */
   public getJSON(): DocumentType<
     Record<string, any> | undefined,
