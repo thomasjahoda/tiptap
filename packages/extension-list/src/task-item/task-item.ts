@@ -47,9 +47,9 @@ export interface TaskItemOptions {
 }
 
 /**
- * Matches a task item to a - [ ] on input.
+ * Matches a task item from "[]", "[x]" "[ ]", or (PATCHED) ".".
  */
-export const inputRegex = /^\s*(\[([( |x])?\])\s$/
+export const inputRegex = /^\s*((\[([( |x])?\])|\.)\s$/
 
 /**
  * This extension allows you to create task items.
