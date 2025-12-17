@@ -212,6 +212,7 @@ export const Link = Mark.create<LinkOptions>({
   exitable: true,
 
   onCreate() {
+    // TODO: v4 - remove validate option
     if (this.options.validate && !this.options.shouldAutoLink) {
       // Copy the validate function to the shouldAutoLink option
       this.options.shouldAutoLink = this.options.validate
@@ -317,6 +318,22 @@ export const Link = Mark.create<LinkOptions>({
     return ['a', mergeAttributes(this.options.HTMLAttributes, effectiveHTMLAttributes), 0]
   },
 
+  markdownTokenName: 'link',
+
+  parseMarkdown: (token, helpers) => {
+    return helpers.applyMark('link', helpers.parseInline(token.tokens || []), {
+      href: token.href,
+      title: token.title || null,
+    })
+  },
+
+  renderMarkdown: (node, h) => {
+    const href = node.attrs?.href || ''
+    const text = h.renderChildren(node)
+
+    return `[${text}](${href})`
+  },
+
   addCommands() {
     return {
       setLink:
@@ -386,15 +403,19 @@ export const Link = Mark.create<LinkOptions>({
             )
 
             if (links.length) {
-              links.forEach(link =>
+              links.forEach(link => {
+                if (!this.options.shouldAutoLink(link.value)) {
+                  return
+                }
+
                 foundLinks.push({
                   text: link.value,
                   data: {
                     href: link.href,
                   },
                   index: link.start,
-                }),
-              )
+                })
+              })
             }
           }
 
@@ -430,15 +451,14 @@ export const Link = Mark.create<LinkOptions>({
       )
     }
 
-    if (this.options.openOnClick === true) {
-      plugins.push(
-        clickHandler({
-          type: this.type,
-          editor: this.editor,
-          enableClickSelection: this.options.enableClickSelection,
-        }),
-      )
-    }
+    plugins.push(
+      clickHandler({
+        type: this.type,
+        editor: this.editor,
+        openOnClick: this.options.openOnClick === 'whenNotEditable' ? true : this.options.openOnClick,
+        enableClickSelection: this.options.enableClickSelection,
+      }),
+    )
 
     if (this.options.linkOnPaste) {
       plugins.push(
@@ -446,6 +466,7 @@ export const Link = Mark.create<LinkOptions>({
           editor: this.editor,
           defaultProtocol: this.options.defaultProtocol,
           type: this.type,
+          shouldAutoLink: this.options.shouldAutoLink,
         }),
       )
     }
