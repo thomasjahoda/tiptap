@@ -180,6 +180,9 @@ class EditorInstanceManager {
   }
 
   static compareOptions(a: UseEditorOptions, b: UseEditorOptions) {
+    if (a === b) {
+      return true
+    }
     return (Object.keys(a) as (keyof UseEditorOptions)[]).every(key => {
       if (
         [
@@ -202,6 +205,9 @@ class EditorInstanceManager {
 
       // We often encourage putting extensions inlined in the options object, so we will do a slightly deeper comparison here
       if (key === 'extensions' && a.extensions && b.extensions) {
+        if (a.extensions === b.extensions) {
+          return true
+        }
         if (a.extensions.length !== b.extensions.length) {
           return false
         }
