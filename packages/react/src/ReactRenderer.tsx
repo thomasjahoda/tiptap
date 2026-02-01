@@ -182,9 +182,10 @@ export class ReactRenderer<R = unknown, P extends Record<string, any> = object> 
       this.element.classList.add(...className.split(' '))
     }
 
-    if (this.editor.isEditorContentInitialized) {
-      // On first render, we need to flush the render synchronously
-      // Renders afterwards can be async, but this fixes a cursor positioning issue
+    // If the editor is already initialized, we will need to
+    // synchronously render the component to ensure it renders
+    // together with Prosemirror's rendering.
+    if (this.editor.isInitialized) {
       flushSync(() => {
         this.render()
       })

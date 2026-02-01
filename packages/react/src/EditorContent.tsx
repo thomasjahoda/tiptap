@@ -89,9 +89,18 @@ export class PureEditorContent extends React.Component<
 > {
   editorContentRef: React.RefObject<any>
 
+  initialized: boolean
+
+  unsubscribeToContentComponent?: () => void
+
   constructor(props: EditorContentProps) {
     super(props)
     this.editorContentRef = React.createRef()
+    this.initialized = false
+
+    this.state = {
+      hasContentComponentInitialized: Boolean((props.editor as EditorWithContentComponent | null)?.contentComponent),
+    }
   }
 
   componentDidMount() {
@@ -120,11 +129,29 @@ export class PureEditorContent extends React.Component<
 
       editor.contentComponent = getInstance()
 
+      // Has the content component been initialized?
+      if (!this.state.hasContentComponentInitialized) {
+        // Subscribe to the content component
+        this.unsubscribeToContentComponent = editor.contentComponent.subscribe(() => {
+          this.setState(prevState => {
+            if (!prevState.hasContentComponentInitialized) {
+              return {
+                hasContentComponentInitialized: true,
+              }
+            }
+            return prevState
+          })
+
+          // Unsubscribe to previous content component
+          if (this.unsubscribeToContentComponent) {
+            this.unsubscribeToContentComponent()
+          }
+        })
+      }
+
       editor.createNodeViews()
 
-      editor.isEditorContentInitialized = true
-
-      this.forceUpdate()
+      this.initialized = true
     }
   }
 
@@ -135,12 +162,16 @@ export class PureEditorContent extends React.Component<
       return
     }
 
-    editor.isEditorContentInitialized = false
+    this.initialized = false
 
     if (!editor.isDestroyed) {
       editor.view.setProps({
         nodeViews: {},
       })
+    }
+
+    if (this.unsubscribeToContentComponent) {
+      this.unsubscribeToContentComponent()
     }
 
     editor.contentComponent = null
