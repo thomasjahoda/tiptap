@@ -27,7 +27,7 @@ import type { Mark } from './Mark.js'
 import type { Node } from './Node.js'
 
 export type AnyConfig = ExtensionConfig | NodeConfig | MarkConfig
-export type AnyExtension = Extendable
+export type AnyExtension<Options = any> = Extendable<Options>
 export type Extensions = AnyExtension[]
 
 export type ParentConfig<T> = Partial<{
