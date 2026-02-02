@@ -58,6 +58,79 @@ export interface TaskItemOptions {
 export const inputRegex = /^\s*((\[([( |x])?\])|\.)\s$/
 
 /**
+ * Attaches all pointer, mouse, and touch event listeners to an element
+ * with stopPropagation and preventDefault invoked.
+ */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function attachAllInputListeners(element: HTMLElement): void {
+  const eventTypes: string[] = [
+    // Pointer Events (Modern, unified)
+    'pointerdown',
+    'pointerup',
+    'pointermove',
+    'pointerover',
+    'pointerout',
+    'pointerenter',
+    'pointerleave',
+    'pointercancel',
+
+    // Mouse Events (Legacy/Specific)
+    'mousedown',
+    'mouseup',
+    'mousemove',
+    'mouseover',
+    'mouseout',
+    'mouseenter',
+    'mouseleave',
+    'click',
+    'dblclick',
+    'contextmenu',
+
+    // Touch Events (Mobile specific)
+    'touchstart',
+    'touchend',
+    'touchmove',
+    'touchcancel',
+
+    // Focus Events
+    'focus',
+    'blur',
+    'focusin',
+    'focusout',
+  ]
+
+  const genericHandler = (event: Event): void => {
+    // Prevents the default browser action (e.g., scrolling, text selection)
+    event.preventDefault()
+
+    // Stops the event from bubbling up to parent elements
+    event.stopPropagation()
+
+    // 3. Specific Focus Logic:
+    // If the element somehow gains focus despite preventDefault,
+    // we forcefully remove it.
+    if (event.type === 'focus' || event.type === 'focusin') {
+      ;(event.currentTarget as HTMLElement).blur()
+    }
+
+    console.log(`Event captured: ${event.type}`, {
+      target: event.target,
+      timestamp: event.timeStamp,
+    })
+  }
+
+  eventTypes.forEach(type => {
+    element.addEventListener(type, genericHandler, {
+      capture: true, // Intercepts event on the way down
+      passive: false,
+    })
+  })
+
+  // Extra precaution: prevent the element from being tab-accessible
+  element.setAttribute('tabindex', '-1')
+}
+
+/**
  * This extension allows you to create task items.
  * @see https://www.tiptap.dev/api/nodes/task-item
  */
@@ -110,17 +183,24 @@ export const TaskItem = Node.create<TaskItemOptions>({
       'li',
       mergeAttributes(this.options.HTMLAttributes, HTMLAttributes, {
         'data-type': this.name,
+        role: 'checkbox',
+        'aria-checked': HTMLAttributes.checked ? 'true' : 'false',
       }),
       [
         'label',
         [
-          'input',
+          'span',
           {
-            type: 'checkbox',
-            checked: node.attrs.checked ? 'checked' : null,
+            class: 'tiptap-task-item-checkbox',
+            'data-checked': node.attrs.checked ? 'checked' : null,
           },
         ],
-        ['span'],
+        [
+          'span',
+          {
+            class: 'tiptap-task-item-checkbox-styler',
+          },
+        ],
       ],
       ['div', 0],
     ]
@@ -181,30 +261,35 @@ export const TaskItem = Node.create<TaskItemOptions>({
       const listItem = document.createElement('li')
       const checkboxWrapper = document.createElement('label')
       const checkboxStyler = document.createElement('span')
-      const checkbox = document.createElement('input')
+      const checkbox = document.createElement('span')
       const content = document.createElement('div')
+
+      checkbox.classList.add('tiptap-task-item-checkbox')
+      checkboxStyler.classList.add('tiptap-task-item-checkbox-styler')
 
       const updateA11Y = (currentNode: ProseMirrorNode) => {
         checkbox.ariaLabel =
-          this.options.a11y?.checkboxLabel?.(currentNode, checkbox.checked) ||
+          this.options.a11y?.checkboxLabel?.(currentNode, checkbox.dataset.checked === 'true') ||
           `Task item checkbox for ${currentNode.textContent || 'empty task item'}`
       }
 
       updateA11Y(node)
 
       checkboxWrapper.contentEditable = 'false'
-      checkbox.type = 'checkbox'
-      checkbox.addEventListener('mousedown', event => event.preventDefault())
-      checkbox.addEventListener('change', event => {
-        // if the editor isn’t editable and we don't have a handler for
-        // readonly checks we have to undo the latest change
-        if (!editor.isEditable && !this.options.onReadOnlyChecked) {
-          checkbox.checked = !checkbox.checked
+      // checkbox.contentEditable = 'false' // does not seem to help, but at least I tried I guess
+      // checkbox.addEventListener('mousedown', event => event.preventDefault())
+      // attachAllInputListeners(checkbox)
+      checkbox.addEventListener('click', _event => {
+        // Determine the new checked state based on the current attribute
+        // (Spans don't natively toggle, so we calculate the inverse of the current state)
+        const oldChecked = checkbox.getAttribute('data-checked') === 'true'
+        const newChecked = !oldChecked
 
+        // if the editor isn’t editable and we don't have a handler for readonly checks we simply ignore the click
+        if (!editor.isEditable && !this.options.onReadOnlyChecked) {
+          // No visual "undo" needed for span as it doesn't auto-update like an input
           return
         }
-
-        const { checked } = event.target as any
 
         if (editor.isEditable && typeof getPos === 'function') {
           editor
@@ -220,7 +305,7 @@ export const TaskItem = Node.create<TaskItemOptions>({
 
               tr.setNodeMarkup(position, undefined, {
                 ...currentNode?.attrs,
-                checked,
+                checked: newChecked,
               })
 
               return true
@@ -229,11 +314,12 @@ export const TaskItem = Node.create<TaskItemOptions>({
         }
         if (!editor.isEditable && this.options.onReadOnlyChecked) {
           // Reset state if onReadOnlyChecked returns false
-          const result = this.options.onReadOnlyChecked(node, checked)
+          const result = this.options.onReadOnlyChecked(node, newChecked)
           if (result === false) {
-            checkbox.checked = !checkbox.checked
+            // No visual "undo" needed for span as it doesn't auto-update like an input
           } else if (result === true) {
-            // simply accept the change and do nothing
+            // change the toggle, but don't actually update the editor content
+            checkbox.dataset.checked = newChecked.toString()
           } else if (result === 'updateEditorContent') {
             // update the editor content to reflect the change
             editor
@@ -248,7 +334,7 @@ export const TaskItem = Node.create<TaskItemOptions>({
 
                 tr.setNodeMarkup(position, undefined, {
                   ...currentNode?.attrs,
-                  checked,
+                  checked: newChecked,
                 })
 
                 return true
@@ -262,8 +348,9 @@ export const TaskItem = Node.create<TaskItemOptions>({
         listItem.setAttribute(key, value)
       })
 
-      listItem.dataset.checked = node.attrs.checked
-      checkbox.checked = node.attrs.checked
+      listItem.dataset.checked = node.attrs.checked.toString()
+      listItem.setAttribute('aria-checked', node.attrs.checked.toString())
+      checkbox.dataset.checked = node.attrs.checked.toString()
 
       checkboxWrapper.append(checkbox, checkboxStyler)
       listItem.append(checkboxWrapper, content)
@@ -284,7 +371,8 @@ export const TaskItem = Node.create<TaskItemOptions>({
           }
 
           listItem.dataset.checked = updatedNode.attrs.checked
-          checkbox.checked = updatedNode.attrs.checked
+          listItem.setAttribute('aria-checked', updatedNode.attrs.checked.toString())
+          checkbox.dataset.checked = updatedNode.attrs.checked
           updateA11Y(updatedNode)
 
           // Sync all HTML attributes from the updated node
