@@ -29,20 +29,21 @@ declare module '@tiptap/core' {
 }
 
 /**
+ * PATCHED: I reverted the regex back to some actually working version, the fucking idiots broke it in https://github.com/ueberdosis/tiptap/pull/5916
  * Regular expressions to match inline code blocks enclosed in backticks.
  *  It matches:
  *     - An opening backtick, followed by
  *     - Any text that doesn't include a backtick (captured for marking), followed by
- *     - A closing backtick as the final character.
+ *     - A closing backtick.
  *  This ensures that any text between backticks is formatted as code,
  *  regardless of the surrounding characters (exception being another backtick).
  */
-export const inputRegex = /(^|[^`])`([^`]+)`(?!`)$/
+export const inputRegex = /(?<!`)`([^`]+)`(?!`)/
 
 /**
  * Matches inline code while pasting.
  */
-export const pasteRegex = /(^|[^`])`([^`]+)`(?!`)/g
+export const pasteRegex = /(?<!`)`([^`]+)`(?!`)/g
 
 /**
  * This extension allows you to mark text as inline code.
@@ -109,7 +110,7 @@ export const Code = Mark.create<CodeOptions>({
 
   addKeyboardShortcuts() {
     return {
-      'Mod-e': () => this.editor.commands.toggleCode(),
+      'Mod-j': () => this.editor.commands.toggleCode(),
     }
   },
 
@@ -118,6 +119,7 @@ export const Code = Mark.create<CodeOptions>({
       markInputRule({
         find: inputRegex,
         type: this.type,
+        // undoable: true, // TODO should it be undoable?
       }),
     ]
   },
