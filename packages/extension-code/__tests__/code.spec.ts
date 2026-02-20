@@ -30,27 +30,13 @@ describe('extension-code input rules', () => {
       return
     }
 
-    const textPrefix = text.slice(0, -1)
-    const textTriggerCharacter = text.slice(-1)
-
-    if (textPrefix.length > 0) {
-      // const { from, to } = editor.state.selection
-      editor.commands.insertContent(textPrefix, {
+    for (let i = 0; i < text.length; i += 1) {
+      editor.commands.insertContent(text[i], {
         applyInputRules: true,
-        // updateSelection: true,
       })
+      // eslint-disable-next-line no-await-in-loop
       await sleep(0) // inputRulesPlugin uses transaction meta applyInputRules, which is set by editor.commands.insertContent, but does it in the next microtask via setTimeout(..., 0)...
-      // editor.view.dispatch(editor.state.tr.insertText(textPrefix, from, to))
     }
-
-    // const { from } = editor.state.selection
-    editor.commands.insertContent(textTriggerCharacter, {
-      applyInputRules: true,
-      // updateSelection: true,
-    })
-    await sleep(0) // inputRulesPlugin uses transaction meta applyInputRules, which is set by editor.commands.insertContent, but does it in the next microtask via setTimeout(..., 0)...
-    // editor.view.someProp('handleTextInput', f => f(editor.view, from, from, textTriggerCharacter))
-    // editor.view.dispatch(editor.state.tr.insertText(textTriggerCharacter, from, from))
   }
 
   beforeEach(() => {
