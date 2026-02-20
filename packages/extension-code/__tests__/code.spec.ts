@@ -17,13 +17,7 @@ describe('extension-code input rules', () => {
     })
   }
   /**
-   * Simulates typing a string into the editor and triggering the input rule on the final char.
-   *
-   * The input rule plugin builds its match string as:
-   *   textBefore = getTextContentFromNodes($from) + text
-   * where `text` is the single character being typed and `$from` is the cursor position before
-   * it is inserted. So we insert the prefix into the doc first, then fire handleTextInput
-   * with only the final character as the trigger.
+   * Simulates typing a string into the editor and triggering the input rules.
    */
   const typeText = async (text: string) => {
     if (text.length === 0) {
@@ -108,7 +102,6 @@ describe('extension-code input rules', () => {
       editor.commands.insertContent('`code`', {
         applyInputRules: false,
       })
-      // TODO actually fix implementation
       await typeText(' ')
       expect(editor.getHTML()).toBe('<p><code>code</code> </p>')
     })

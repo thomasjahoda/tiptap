@@ -127,9 +127,22 @@ function run(config: {
       state: view.state,
       transaction: tr,
     })
+    if (match.index === undefined) {
+      throw new Error('InputRule run: match.index is undefined')
+    }
+    const matchFrom = from - $from.parentOffset + match.index
     const range = {
-      from: from - (match[0].length - text.length),
-      to,
+      // `textBefore` starts at doc position `from - $from.parentOffset` (paragraph content start),
+      // and `match.index` is the offset of the match within `textBefore`.
+      // This correctly computes range.from in both the real keyboard-input path (where `text`
+      // has not yet been inserted) and the simulated `insertContent` path (where `text` IS
+      // already in the doc but may not be the tail of `match[0]`).
+      from: matchFrom,
+      // Cap range.to at the end of the actual match so that characters that are in the
+      // document *after* the match (e.g. a trailing space that merely *triggered* the rule but
+      // is not part of `match[0]`) are not accidentally consumed by the handler.
+      // In the real keyboard-input path `to` never exceeds the match end so this is a no-op.
+      to: Math.min(to, matchFrom + match[0].length),
     }
 
     const { commands, chain, can } = new CommandManager({
