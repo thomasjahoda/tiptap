@@ -8,6 +8,7 @@ type ClickHandlerOptions = {
   editor: Editor
   openOnClick?: boolean
   enableClickSelection?: boolean
+  requiredClassNamesOnAnchorElement?: string[]
 }
 
 export function clickHandler(options: ClickHandlerOptions): Plugin {
@@ -41,6 +42,18 @@ export function clickHandler(options: ClickHandlerOptions): Plugin {
 
           if (link && !root.contains(link)) {
             link = null
+          }
+        }
+        if (
+          link &&
+          options.requiredClassNamesOnAnchorElement !== undefined &&
+          options.requiredClassNamesOnAnchorElement.length > 0
+        ) {
+          const hasRequiredClass = options.requiredClassNamesOnAnchorElement.every(className =>
+            link.classList.contains(className),
+          )
+          if (!hasRequiredClass) {
+            return false
           }
         }
 

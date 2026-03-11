@@ -485,6 +485,8 @@ export const Link = Mark.create<LinkOptions>({
         editor: this.editor,
         openOnClick: this.options.openOnClick === 'whenNotEditable' ? true : this.options.openOnClick,
         enableClickSelection: this.options.enableClickSelection,
+        requiredClassNamesOnAnchorElement:
+          this.options.HTMLAttributes.class != null ? this.options.HTMLAttributes.class.split(' ') : undefined,
       }),
     )
 
