@@ -100,6 +100,31 @@ describe('UniqueID collaboration handling', () => {
     editor.destroy()
   })
 
+  it('assigns IDs when y-sync$ transaction arrives before onCreate runs', () => {
+    // Do NOT flush timers yet — onCreate has not run
+    const editor = createEditor({ withCollaboration: true })
+
+    // Dispatch a y-sync$ transaction before onCreate (before vi.runAllTimers)
+    const { tr } = editor.state
+    tr.setMeta('y-sync$', true)
+    tr.insertText(' ', 1)
+    editor.view.dispatch(tr)
+
+    // IDs should already be assigned from the appendTransaction handler
+    const idsBeforeOnCreate = getParagraphIds(editor)
+    expect(idsBeforeOnCreate.length).toBeGreaterThan(0)
+    expect(idsBeforeOnCreate.every(id => id !== null && typeof id === 'string')).toBe(true)
+
+    // Now flush timers so onCreate runs — should not cause issues
+    vi.runAllTimers()
+
+    // IDs should still be present and unchanged
+    const idsAfterOnCreate = getParagraphIds(editor)
+    expect(idsAfterOnCreate).toEqual(idsBeforeOnCreate)
+
+    editor.destroy()
+  })
+
   it('still assigns IDs immediately when no collaboration extension', () => {
     const editor = createEditor({ withCollaboration: false })
 
