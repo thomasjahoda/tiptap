@@ -136,24 +136,6 @@ jobs:
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
-  notify-discord:
-    name: Send notification to Discord
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    needs:
-      - release
-      - notify-slack
-    if: always() && needs.release.result == 'success' && needs.release.outputs.published == 'true' && needs.notify-slack.result == 'success'
-    permissions: {}
-
-    steps:
-      - name: Send Discord notification
-        uses: tsickert/discord-webhook@v7.0.0
-        with:
-          webhook-url: ${{ secrets.DISCORD_RELEASES_STABLE_WEBHOOK }}
-          content: '[Tiptap Editor ${{ needs.release.outputs.release_kind == ''stable'' && ''Release'' || ''Pre-release'' }}] Published packages from branch ${{ github.ref_name }} with npm tag ${{ needs.release.outputs.dist_tag }}.'
-          wait: true
-
   notify-slack-failure:
     name: Send failure notification to Slack
     runs-on: ubuntu-latest
