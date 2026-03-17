@@ -34,24 +34,24 @@ Before you start a task, make sure the repositories are updated to the latest ve
 
 ### React
 
-- Prefer using the React Composable API. See `tiptap-docs/guides/react-composable-api`
+- Prefer using the React Composable API. See `tiptap-docs/src/content/guides/react-composable-api.mdx`
 
 ## Implementing Editor Features
 
 When the user asks you to implement one of these features, read the corresponding section in tiptap-docs for guidance.
 
-- **Real-time collaboration** — Multiple users editing a document simultaneously. See `tiptap-docs/collaboration/`.
-- **Comments** — Thread-based inline and document comments. See `tiptap-docs/comments/`.
-- **Tracked changes** — Track, accept, and reject document edits. See `tiptap-docs/tracked-changes/`.
-- **Import/Export** — Convert documents to and from DOCX, PDF, Markdown, and other formats. See `tiptap-docs/conversion/`.
-- **AI content generation** — Generate text content into the document using AI. See `tiptap-docs/content-ai/capabilities/ai-toolkit/workflows/insert-content`.
-- **AI agent document editing** — Give an AI agent the ability to edit Tiptap documents. See `tiptap-docs/content-ai/capabilities/ai-toolkit/`.
-- **AI review and proofreading** — Review, proofread, and suggest style improvements. See `tiptap-docs/content-ai/capabilities/ai-toolkit/workflows/proofreader`.
-- **AI server-side processing** — Run AI workflows that edit rich text documents on the server. See `tiptap-docs/content-ai/capabilities/server-ai-toolkit/`.
-- **Version history** — Save and restore document snapshots. See `tiptap-docs/collaboration/documents/snapshot`.
-- **Snapshot compare** — Highlight differences between document versions. See `tiptap-docs/collaboration/documents/snapshot-compare`.
-- **Pages** — Print-ready page layout with headers, footers, and page breaks. See `tiptap-docs/pages/`.
+- **Real-time collaboration** — Multiple users editing a document simultaneously. See `tiptap-docs/src/content/collaboration/`.
+- **Comments** — Thread-based inline and document comments. See `tiptap-docs/src/content/comments/`.
+- **Tracked changes** — Track, accept, and reject document edits. See `tiptap-docs/src/content/tracked-changes/`.
+- **Import/Export** — Convert documents to and from DOCX, PDF, Markdown, and other formats. See `tiptap-docs/src/content/conversion/`.
+- **AI content generation** — Generate text content into the document using AI. See `tiptap-docs/src/content/content-ai/capabilities/ai-toolkit/workflows/insert-content.mdx`.
+- **AI agent document editing** — Give an AI agent the ability to edit Tiptap documents. See `tiptap-docs/src/content/content-ai/capabilities/ai-toolkit/`.
+- **AI review and proofreading** — Review, proofread, and suggest style improvements. See `tiptap-docs/src/content/content-ai/capabilities/ai-toolkit/workflows/proofreader.mdx`.
+- **AI server-side processing** — Run AI workflows that edit rich text documents on the server. See `tiptap-docs/src/content/content-ai/capabilities/server-ai-toolkit/`.
+- **Version history** — Save and restore document snapshots. See `tiptap-docs/src/content/collaboration/documents/snapshot.mdx`.
+- **Snapshot compare** — Highlight differences between document versions. See `tiptap-docs/src/content/collaboration/documents/snapshot-compare.mdx`.
+- **Pages** — Print-ready page layout with headers, footers, and page breaks. See `tiptap-docs/src/content/pages/`.
 
 ## Pro Extensions
 
-Some Tiptap extensions are distributed through a private npm registry. To install pro packages, see `tiptap-docs/guides/pro-extensions` for setup instructions.
+Some Tiptap extensions are distributed through a private npm registry. To install pro packages, see `tiptap-docs/src/content/guides/pro-extensions.mdx` for setup instructions.
