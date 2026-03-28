@@ -10,6 +10,9 @@ import {
   type MarkdownToken,
   type MarkdownTokenizer,
   type RenderContext,
+  callOrReturn,
+  decodeHtmlEntities,
+  encodeHtmlEntities,
   flattenExtensions,
   generateJSON,
   getExtensionField,
@@ -35,6 +38,8 @@ export class MarkdownManager {
   private indentSize: number
   private baseExtensions: AnyExtension[] = []
   private extensions: AnyExtension[] = []
+  /** Set of extension names whose `code` spec property is truthy (nodes and marks). */
+  private codeTypes: Set<string> = new Set()
 
   /**
    * Create a MarkdownManager.
@@ -98,7 +103,15 @@ export class MarkdownManager {
     // Keep track of all extensions for HTML parsing
     this.extensions.push(extension)
 
+    // Track extensions that declare `code: true` so we can skip HTML entity
+    // encoding inside code contexts without hardcoding specific type names.
+    const isCode = callOrReturn(getExtensionField(extension, 'code'))
+
     const name = extension.name
+
+    if (isCode) {
+      this.codeTypes.add(name)
+    }
     const tokenName =
       (getExtensionField(extension, 'markdownTokenName') as ExtendableConfig['markdownTokenName']) || name
     const parseMarkdown = getExtensionField(extension, 'parseMarkdown') as ExtendableConfig['parseMarkdown'] | undefined
@@ -640,9 +653,10 @@ export class MarkdownManager {
       const token = tokens[i]
 
       if (token.type === 'text') {
+        // Create text node – decode HTML entities so that e.g. `&lt;` displays as `<` in the editor
         result.push({
           type: 'text',
-          text: token.text || '',
+          text: decodeHtmlEntities(token.text || ''),
         })
       } else if (token.type === 'html') {
         // Handle possible split inline HTML by attempting to detect an
@@ -806,7 +820,7 @@ export class MarkdownManager {
       case 'text':
         return {
           type: 'text',
-          text: token.text || '',
+          text: decodeHtmlEntities(token.text || ''),
         }
 
       case 'html':
@@ -884,6 +898,18 @@ export class MarkdownManager {
     }
   }
 
+  /**
+   * Encode HTML entities in text unless the node is inside a code context
+   * (code mark or code-block parent) where literal characters should be preserved.
+   */
+  private encodeTextForMarkdown(text: string, node: JSONContent, parentNode?: JSONContent): string {
+    const isInsideCode =
+      (parentNode?.type != null && this.codeTypes.has(parentNode.type)) ||
+      (node.marks || []).some(m => this.codeTypes.has(typeof m === 'string' ? m : m.type))
+
+    return isInsideCode ? text : encodeHtmlEntities(text)
+  }
+
   renderNodeToMarkdown(
     node: JSONContent,
     parentNode?: JSONContent,
@@ -894,7 +920,7 @@ export class MarkdownManager {
     // if node is a text node, we simply return it's text content
     // marks are handled at the array level in renderNodesWithMarkBoundaries
     if (node.type === 'text') {
-      return node.text || ''
+      return this.encodeTextForMarkdown(node.text || '', node, parentNode)
     }
 
     if (!node.type) {
@@ -991,7 +1017,7 @@ export class MarkdownManager {
       }
 
       if (node.type === 'text') {
-        let textContent = node.text || ''
+        let textContent = this.encodeTextForMarkdown(node.text || '', node, parentNode)
         const currentMarks = new Map((node.marks || []).map(mark => [mark.type, mark]))
 
         // Find marks that need to be closed and opened
