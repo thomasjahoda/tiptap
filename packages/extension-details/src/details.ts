@@ -245,7 +245,7 @@ export const Details = Node.create<DetailsOptions>({
             return false
           }
 
-          const target = mutation.target as Node
+          const target = mutation.target
           const isInsideWrapper = dom.contains(target)
           const isInsideToggleButton = toggle.contains(target)
 
