@@ -6,6 +6,7 @@ import { type SelectionRange, NodeSelection } from '@tiptap/pm/state'
 import type { NormalizedNestedOptions } from '../types/options.js'
 import { cloneElement } from './cloneElement.js'
 import { findElementNextToCoords } from './findNextElementFromCursor.js'
+import { getDraggedBlockDir } from './getDraggedBlockDir.js'
 import { removeNode } from './removeNode.js'
 
 export interface DragContext {
@@ -89,8 +90,11 @@ export function dragHandler(
 
   const { tr } = view.state
   const wrapper = document.createElement('div')
+
   const from = ranges[0].$from.pos
   const to = ranges[ranges.length - 1].$to.pos
+
+  wrapper.setAttribute('dir', getDraggedBlockDir(view, from))
 
   // For nested mode, create slice directly to avoid NodeRangeSelection expanding to parent
   const isNestedDrag = nestedOptions?.enabled && dragContext?.node
@@ -122,7 +126,9 @@ export function dragHandler(
   document.body.append(wrapper)
 
   event.dataTransfer.clearData()
-  event.dataTransfer.setDragImage(wrapper, 0, 0)
+  const wrapperRect = wrapper.getBoundingClientRect()
+  const dragImageX = event.clientX - wrapperRect.left
+  event.dataTransfer.setDragImage(wrapper, Math.max(0, Math.min(dragImageX, wrapperRect.width)), 0)
 
   let cleanedUp = false
 
