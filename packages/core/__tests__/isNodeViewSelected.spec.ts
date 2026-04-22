@@ -140,6 +140,48 @@ describe('isNodeViewSelected', () => {
     ).toBe(false)
   })
 
+  it('returns false when the cursor sits exactly at the node boundary before it with the option enabled', () => {
+    editor = new Editor({
+      extensions: [Document, Paragraph, Text, BlockWithContent],
+      content: '<block-with-content>hello</block-with-content>',
+    })
+
+    const pos = 0
+    const node = editor.state.doc.nodeAt(pos)!
+    // Cursor at `pos` is the gap *before* the node, not inside it.
+    editor.view.dispatch(editor.state.tr.setSelection(TextSelection.create(editor.state.doc, pos)))
+
+    expect(
+      isNodeViewSelected({
+        selection: editor.state.selection,
+        pos,
+        nodeSize: node.nodeSize,
+        selectedOnTextSelection: true,
+      }),
+    ).toBe(false)
+  })
+
+  it('returns false when the cursor sits exactly at the node boundary after it with the option enabled', () => {
+    editor = new Editor({
+      extensions: [Document, Paragraph, Text, BlockWithContent],
+      content: '<block-with-content>hello</block-with-content><p>world</p>',
+    })
+
+    const pos = 0
+    const node = editor.state.doc.nodeAt(pos)!
+    // Cursor at `pos + nodeSize` is the gap *after* the node, not inside it.
+    editor.view.dispatch(editor.state.tr.setSelection(TextSelection.create(editor.state.doc, pos + node.nodeSize)))
+
+    expect(
+      isNodeViewSelected({
+        selection: editor.state.selection,
+        pos,
+        nodeSize: node.nodeSize,
+        selectedOnTextSelection: true,
+      }),
+    ).toBe(false)
+  })
+
   it('returns false on a partial overlap (selection crosses the boundary) with the option enabled', () => {
     editor = new Editor({
       extensions: [Document, Paragraph, Text, BlockWithContent],

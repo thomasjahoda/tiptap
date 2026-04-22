@@ -1,5 +1,7 @@
 import type { Selection } from '@tiptap/pm/state'
 
+import { isTextSelection } from './isTextSelection.js'
+
 /**
  * Determines whether a node view should be considered selected for the given
  * editor selection.
@@ -32,7 +34,7 @@ export function isNodeViewSelected({
     return true
   }
 
-  if (selectedOnTextSelection && from >= pos && to <= pos + nodeSize) {
+  if (selectedOnTextSelection && isTextSelection(selection) && from > pos && to < pos + nodeSize) {
     return true
   }
 
