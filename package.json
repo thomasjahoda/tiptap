@@ -90,6 +90,7 @@
     "@rollup/pluginutils": "^5.1.4",
     "@rollup/pluginutils>picomatch": "2.3.2",
     "@octokit/action>undici": "6.24.1",
+    "@cypress/request>uuid": "14.0.0",
     "anymatch>picomatch": "2.3.2",
     "glob": "^10.5.0",
     "micromatch>picomatch": "2.3.2",
@@ -119,6 +120,7 @@
     "overrides": {
       "@rollup/pluginutils>picomatch": "2.3.2",
       "@octokit/action>undici": "6.24.1",
+      "@cypress/request>uuid": "14.0.0",
       "anymatch>picomatch": "2.3.2",
       "glob": "^10.5.0",
       "micromatch>picomatch": "2.3.2",
