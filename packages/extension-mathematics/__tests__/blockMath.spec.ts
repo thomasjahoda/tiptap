@@ -1,5 +1,6 @@
 import { Editor } from '@tiptap/core'
 import Document from '@tiptap/extension-document'
+import { BulletList, ListItem } from '@tiptap/extension-list'
 import Paragraph from '@tiptap/extension-paragraph'
 import Text from '@tiptap/extension-text'
 import { afterEach, describe, expect, it } from 'vitest'
@@ -32,6 +33,47 @@ describe('BlockMath', () => {
       expect(editor.getJSON()).toEqual({
         type: 'doc',
         content: [{ type: 'blockMath', attrs: { latex: 'x^2' } }],
+      })
+    })
+
+    it('inserts a sibling block math node inside a list item without breaking the schema', () => {
+      editor = new Editor({
+        extensions: [Document, Paragraph, Text, BulletList, ListItem, BlockMath],
+        content: {
+          type: 'doc',
+          content: [
+            {
+              type: 'bulletList',
+              content: [
+                {
+                  type: 'listItem',
+                  content: [{ type: 'paragraph', content: [{ type: 'text', text: '$$$x^2$$' }] }],
+                },
+              ],
+            },
+          ],
+        },
+      })
+
+      editor.commands.setTextSelection(editor.state.doc.content.size - 3)
+
+      editor.view.someProp('handleTextInput', f =>
+        f(editor.view, editor.state.selection.from, editor.state.selection.from, '$'),
+      )
+
+      expect(editor.getJSON()).toEqual({
+        type: 'doc',
+        content: [
+          {
+            type: 'bulletList',
+            content: [
+              {
+                type: 'listItem',
+                content: [{ type: 'paragraph' }, { type: 'blockMath', attrs: { latex: 'x^2' } }],
+              },
+            ],
+          },
+        ],
       })
     })
 
