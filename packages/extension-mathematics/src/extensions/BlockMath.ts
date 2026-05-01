@@ -221,10 +221,14 @@ export const BlockMath = Node.create<BlockMathOptions>({
         handler: ({ state, range, match }) => {
           const [, latex] = match
           const { tr } = state
-          const start = range.from
-          const end = range.to
+          const $from = state.doc.resolve(range.from)
+          const node = this.type.create({ latex })
 
-          tr.replaceWith(start, end, this.type.create({ latex }))
+          if ($from.parent.isTextblock && range.from === $from.start() && range.to === $from.end()) {
+            tr.replaceWith($from.before(), $from.after(), node)
+          } else {
+            tr.replaceWith(range.from, range.to, node)
+          }
         },
       }),
     ]
