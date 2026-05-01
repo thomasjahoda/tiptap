@@ -55,7 +55,7 @@ declare module '@tiptap/core' {
        * @param options - Options for updating block math.
        * @returns ReturnType
        */
-      updateBlockMath: (options?: { latex: string; pos?: number }) => ReturnType
+      updateBlockMath: (options?: { latex?: string; pos?: number }) => ReturnType
     }
   }
 }
@@ -157,7 +157,7 @@ export const BlockMath = Node.create<BlockMathOptions>({
 
           tr.setNodeMarkup(pos, this.type, {
             ...node.attrs,
-            latex: latex || node.attrs.latex,
+            latex: latex ?? node.attrs.latex,
           })
 
           return true
