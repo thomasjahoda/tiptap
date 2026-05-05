@@ -56,7 +56,34 @@ export const LineHeight = Extension.create<LineHeightOptions>({
         attributes: {
           lineHeight: {
             default: null,
-            parseHTML: element => element.style.lineHeight,
+            parseHTML: element => {
+              // Prefer the raw inline `style` attribute so we preserve
+              // the original format instead of the canonicalized value
+              // returned by `element.style.lineHeight`.
+              // When nested spans are merged the style attribute may
+              // contain multiple `line-height:` declarations
+              // (parent;child). We should pick the last declaration so
+              // the child's line-height takes priority.
+              const styleAttr = element.getAttribute('style')
+              if (styleAttr) {
+                const decls = styleAttr
+                  .split(';')
+                  .map(s => s.trim())
+                  .filter(Boolean)
+                for (let i = decls.length - 1; i >= 0; i -= 1) {
+                  const parts = decls[i].split(':')
+                  if (parts.length >= 2) {
+                    const prop = parts[0].trim().toLowerCase()
+                    const val = parts.slice(1).join(':').trim()
+                    if (prop === 'line-height') {
+                      return val
+                    }
+                  }
+                }
+              }
+
+              return element.style.lineHeight
+            },
             renderHTML: attributes => {
               if (!attributes.lineHeight) {
                 return {}
