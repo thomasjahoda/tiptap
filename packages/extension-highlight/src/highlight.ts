@@ -1,4 +1,4 @@
-import { Mark, markInputRule, markPasteRule, mergeAttributes } from '@tiptap/core'
+import { getStyleProperty, Mark, markInputRule, markPasteRule, mergeAttributes } from '@tiptap/core'
 
 export interface HighlightOptions {
   /**
@@ -72,37 +72,14 @@ export const Highlight = Mark.create<HighlightOptions>({
     return {
       color: {
         default: null,
-        parseHTML: element => {
-          // Prefer `data-color` set by our own `renderHTML` since it
-          // round-trips losslessly. Otherwise parse the raw inline
-          // `style` attribute so we preserve the original color format
-          // (e.g. `#rrggbb`) instead of the canonicalized `rgb(...)`
-          // value returned by `element.style.backgroundColor`.
-          const dataColor = element.getAttribute('data-color')
-          if (dataColor) {
-            return dataColor
-          }
-
-          const styleAttr = element.getAttribute('style')
-          if (styleAttr) {
-            const decls = styleAttr
-              .split(';')
-              .map(s => s.trim())
-              .filter(Boolean)
-            for (let i = decls.length - 1; i >= 0; i -= 1) {
-              const parts = decls[i].split(':')
-              if (parts.length >= 2) {
-                const prop = parts[0].trim().toLowerCase()
-                const val = parts.slice(1).join(':').trim()
-                if (prop === 'background-color') {
-                  return val
-                }
-              }
-            }
-          }
-
-          return element.style.backgroundColor
-        },
+        // Prefer `data-color` (set by our own `renderHTML`) for lossless
+        // round-trips. Otherwise parse the raw inline `style` attribute so
+        // the original color format (e.g. `#rrggbb`) is preserved instead of
+        // the canonicalized `rgb(...)` value from `element.style.backgroundColor`.
+        parseHTML: element =>
+          element.getAttribute('data-color') ||
+          getStyleProperty(element, 'background-color') ||
+          element.style.backgroundColor,
         renderHTML: attributes => {
           if (!attributes.color) {
             return {}

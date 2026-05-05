@@ -1,6 +1,6 @@
 import '../text-style/index.js'
 
-import { Extension } from '@tiptap/core'
+import { Extension, getStyleProperty } from '@tiptap/core'
 
 export type FontFamilyOptions = {
   /**
@@ -56,37 +56,11 @@ export const FontFamily = Extension.create<FontFamilyOptions>({
         attributes: {
           fontFamily: {
             default: null,
-            parseHTML: element => {
-              // Prefer the raw inline `style` attribute so we preserve
-              // the original format (e.g. unquoted or single-quoted
-              // multi-word names) instead of the canonicalized value
-              // returned by `element.style.fontFamily`, which forces
-              // double quotes that then get HTML-encoded to `&quot;`
-              // when the style attribute is serialized.
-              // When nested spans are merged the style attribute may
-              // contain multiple `font-family:` declarations
-              // (parent;child). We should pick the last declaration so
-              // the child's font-family takes priority.
-              const styleAttr = element.getAttribute('style')
-              if (styleAttr) {
-                const decls = styleAttr
-                  .split(';')
-                  .map(s => s.trim())
-                  .filter(Boolean)
-                for (let i = decls.length - 1; i >= 0; i -= 1) {
-                  const parts = decls[i].split(':')
-                  if (parts.length >= 2) {
-                    const prop = parts[0].trim().toLowerCase()
-                    const val = parts.slice(1).join(':').trim()
-                    if (prop === 'font-family') {
-                      return val
-                    }
-                  }
-                }
-              }
-
-              return element.style.fontFamily
-            },
+            // Prefer the raw inline `style` attribute so unquoted or
+            // single-quoted multi-word names are preserved instead of being
+            // canonicalized by `element.style.fontFamily`, which forces double
+            // quotes that then get HTML-encoded to `&quot;` on serialization.
+            parseHTML: element => getStyleProperty(element, 'font-family') ?? element.style.fontFamily,
             renderHTML: attributes => {
               if (!attributes.fontFamily) {
                 return {}

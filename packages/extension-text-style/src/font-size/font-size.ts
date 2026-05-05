@@ -1,6 +1,6 @@
 import '../text-style/index.js'
 
-import { Extension } from '@tiptap/core'
+import { Extension, getStyleProperty } from '@tiptap/core'
 
 export type FontSizeOptions = {
   /**
@@ -56,34 +56,10 @@ export const FontSize = Extension.create<FontSizeOptions>({
         attributes: {
           fontSize: {
             default: null,
-            parseHTML: element => {
-              // Prefer the raw inline `style` attribute so we preserve
-              // the original format instead of the canonicalized value
-              // returned by `element.style.fontSize`.
-              // When nested spans are merged the style attribute may
-              // contain multiple `font-size:` declarations
-              // (parent;child). We should pick the last declaration so
-              // the child's font-size takes priority.
-              const styleAttr = element.getAttribute('style')
-              if (styleAttr) {
-                const decls = styleAttr
-                  .split(';')
-                  .map(s => s.trim())
-                  .filter(Boolean)
-                for (let i = decls.length - 1; i >= 0; i -= 1) {
-                  const parts = decls[i].split(':')
-                  if (parts.length >= 2) {
-                    const prop = parts[0].trim().toLowerCase()
-                    const val = parts.slice(1).join(':').trim()
-                    if (prop === 'font-size') {
-                      return val
-                    }
-                  }
-                }
-              }
-
-              return element.style.fontSize
-            },
+            // Prefer the raw inline `style` attribute so the original format
+            // is preserved instead of the canonicalized value returned by
+            // `element.style.fontSize`.
+            parseHTML: element => getStyleProperty(element, 'font-size') ?? element.style.fontSize,
             renderHTML: attributes => {
               if (!attributes.fontSize) {
                 return {}
