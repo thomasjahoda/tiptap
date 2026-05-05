@@ -119,20 +119,10 @@ describe('BlockMath', () => {
       expect(editor.state.doc.firstChild?.attrs.latex).toBe('')
     })
 
-    it('keeps the existing latex when no latex option is provided', () => {
-      editor = createEditor('x^2')
-
-      editor.commands.updateBlockMath({ pos: 0 })
-
-      expect(editor.state.doc.firstChild?.attrs.latex).toBe('x^2')
-    })
-
-    it('matches updateInlineMath behavior for empty-string and missing latex', () => {
+    it('matches updateInlineMath behavior when clearing latex with an empty string', () => {
       const blockEditor = createEditor('x^2')
       blockEditor.commands.updateBlockMath({ latex: '', pos: 0 })
       const blockEmpty = blockEditor.state.doc.firstChild?.attrs.latex
-      blockEditor.commands.updateBlockMath({ pos: 0 })
-      const blockUnchanged = blockEditor.state.doc.firstChild?.attrs.latex
       blockEditor.destroy()
 
       const inlineEditor = new Editor({
@@ -150,12 +140,9 @@ describe('BlockMath', () => {
       const inlinePos = 1
       inlineEditor.commands.updateInlineMath({ latex: '', pos: inlinePos })
       const inlineEmpty = inlineEditor.state.doc.nodeAt(inlinePos)?.attrs.latex
-      inlineEditor.commands.updateInlineMath({ pos: inlinePos })
-      const inlineUnchanged = inlineEditor.state.doc.nodeAt(inlinePos)?.attrs.latex
       inlineEditor.destroy()
 
       expect(blockEmpty).toBe(inlineEmpty)
-      expect(blockUnchanged).toBe(inlineUnchanged)
     })
   })
 })

@@ -55,7 +55,7 @@ declare module '@tiptap/core' {
        * @param options - Options for updating block math.
        * @returns ReturnType
        */
-      updateBlockMath: (options?: { latex?: string; pos?: number }) => ReturnType
+      updateBlockMath: (options?: { latex: string; pos?: number }) => ReturnType
     }
   }
 }
