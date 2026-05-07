@@ -339,6 +339,15 @@ export interface EditorOptions {
     clipboardTextSerializer?: {
       blockSeparator?: string
     }
+    /**
+     * Options for the `tabindex` core extension.
+     */
+    tabindex?: {
+      /**
+       * The value for the `tabindex` attribute on the editor element.
+       */
+      value?: string
+    }
     delete?: {
       /**
        * Whether the `delete` extension should be called asynchronously to avoid blocking the editor while processing deletions
