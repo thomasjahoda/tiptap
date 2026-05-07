@@ -157,7 +157,7 @@ export const BlockMath = Node.create<BlockMathOptions>({
 
           tr.setNodeMarkup(pos, this.type, {
             ...node.attrs,
-            latex: latex || node.attrs.latex,
+            latex: latex ?? node.attrs.latex,
           })
 
           return true
