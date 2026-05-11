@@ -132,7 +132,39 @@ Feel like adding some magic of your own to Tiptap Editor Core? We welcome contri
 The MIT License (MIT). Please see [License File](LICENSE.md) for more information.
 
 ## Fork
-Change package name, then build and publish using: ```
-cd packages/<package-name>
-tsup && pnpm publish --access public --no-git-checks
+
+This repository includes a helper script to publish forked packages under a custom npm scope (default: `@thomasjahoda-forks`).
+
+### Publish changed packages only (default)
+
+By default, the script compares the current branch against `upstream/main` and only publishes packages that have actual changes:
+
+```bash
+pnpm run publish:fork -- --dry-run
 ```
+
+### Publish all packages
+
+```bash
+pnpm run publish:fork -- --all
+```
+
+### Publish specific packages
+
+```bash
+pnpm run publish:fork -- --packages "@tiptap/core,@tiptap/react"
+```
+
+### Common options
+
+| Option | Description |
+|--------|-------------|
+| `--dry-run` | Simulate publishing without writing to the registry |
+| `--skip-build` | Skip `pnpm build` before publishing |
+| `--version <ver>` | Override the version (default: `<core-version>-fork.<YYYYMMDDhhmmss>`) |
+| `--tag <tag>` | npm dist-tag (default: `latest`) |
+| `--scope <scope>` | Target npm scope (default: `@thomasjahoda-forks`) |
+| `--upstream-ref <ref>` | Git ref to compare against (default: `upstream/main`) |
+| `--keep-staging` | Keep the temporary staging directory after publishing |
+
+The script stages each package by packing it, extracting the tarball, rewriting the package `name` (and optionally `version`), then running `npm publish --access public`. It intentionally **does not rewrite dependencies** — you should use `pnpm.overrides` or `npm:` aliases in your consuming projects to redirect `@tiptap/*` packages to your fork.
