@@ -1,5 +1,112 @@
 # Change Log
 
+## 3.23.1
+
+### Patch Changes
+
+- @tiptap/extension-list@3.23.1
+
+## 3.23.0
+
+### Patch Changes
+
+- Updated dependencies [57f8d66]
+  - @tiptap/extension-list@3.23.0
+
+## 3.22.5
+
+### Patch Changes
+
+- @tiptap/extension-list@3.22.5
+
+## 3.22.4
+
+### Patch Changes
+
+- 27ea931: Fix dependencies installation after packages updates producing peer dependency resolution conflicts
+- Updated dependencies [27ea931]
+- Updated dependencies [5ca9902]
+  - @tiptap/extension-list@3.22.4
+
+## 3.22.3
+
+### Patch Changes
+
+- @tiptap/extension-list@3.22.3
+
+## 3.22.2
+
+### Patch Changes
+
+- @tiptap/extension-list@3.22.2
+
+## 3.22.1
+
+### Patch Changes
+
+- @tiptap/extension-list@3.22.1
+
+## 3.22.0
+
+### Patch Changes
+
+- @tiptap/extension-list@3.22.0
+
+## 3.21.0
+
+### Patch Changes
+
+- @tiptap/extension-list@3.21.0
+
+## 3.20.6
+
+### Patch Changes
+
+- @tiptap/extension-list@3.20.6
+
+## 3.20.5
+
+### Patch Changes
+
+- @tiptap/extension-list@3.20.5
+
+## 3.20.4
+
+### Patch Changes
+
+- @tiptap/extension-list@3.20.4
+
+## 3.20.3
+
+### Patch Changes
+
+- @tiptap/extension-list@3.20.3
+
+## 3.20.2
+
+### Patch Changes
+
+- Updated dependencies [269823d]
+  - @tiptap/extension-list@3.20.2
+
+## 3.20.1
+
+### Patch Changes
+
+- @tiptap/extension-list@3.20.1
+
+## 3.20.0
+
+### Patch Changes
+
+- @tiptap/extension-list@3.20.0
+
+## 3.19.0
+
+### Patch Changes
+
+- @tiptap/extension-list@3.19.0
+
 ## 3.18.0
 
 ### Patch Changes

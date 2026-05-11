@@ -157,6 +157,8 @@ export class BubbleMenuView implements PluginView {
 
   public preventHide = false
 
+  public pluginKey: PluginKey | string
+
   public updateDelay: number
 
   public resizeDelay: number
@@ -331,6 +333,7 @@ export class BubbleMenuView implements PluginView {
     editor,
     element,
     view,
+    pluginKey = 'bubbleMenu',
     updateDelay = 250,
     resizeDelay = 60,
     shouldShow,
@@ -341,6 +344,7 @@ export class BubbleMenuView implements PluginView {
     this.editor = editor
     this.element = element
     this.view = view
+    this.pluginKey = pluginKey
     this.updateDelay = updateDelay
     this.resizeDelay = resizeDelay
     this.appendTo = appendTo
@@ -426,6 +430,10 @@ export class BubbleMenuView implements PluginView {
   }
 
   updatePosition() {
+    if (!this.isVisible) {
+      return
+    }
+
     const virtualElement = this.virtualElement
 
     if (!virtualElement) {
@@ -437,6 +445,10 @@ export class BubbleMenuView implements PluginView {
       strategy: this.floatingUIOptions.strategy,
       middleware: this.middlewares,
     }).then(({ x, y, strategy, middlewareData }) => {
+      if (!this.isVisible || this.editor.isDestroyed || !this.element.isConnected) {
+        return
+      }
+
       // Handle hide middleware - hide element if reference is hidden or element has escaped
       if (middlewareData.hide?.referenceHidden || middlewareData.hide?.escaped) {
         this.element.style.visibility = 'hidden'
@@ -526,8 +538,8 @@ export class BubbleMenuView implements PluginView {
       return
     }
 
-    this.updatePosition()
     this.show()
+    this.updatePosition()
   }
 
   show() {
@@ -566,12 +578,23 @@ export class BubbleMenuView implements PluginView {
     this.isVisible = false
   }
 
+  /**
+   * Handles the transaction event to update the position of the bubble menu.
+   * This allows external code to trigger a position update via:
+   * `editor.view.dispatch(editor.state.tr.setMeta(pluginKey, 'updatePosition'))`
+   * The `pluginKey` defaults to `bubbleMenu`
+   */
   transactionHandler = ({ transaction: tr }: { transaction: Transaction }) => {
-    const meta = tr.getMeta('bubbleMenu')
+    const meta = tr.getMeta(this.pluginKey)
     if (meta === 'updatePosition') {
       this.updatePosition()
     } else if (meta && typeof meta === 'object' && meta.type === 'updateOptions') {
       this.updateOptions(meta.options)
+    } else if (meta === 'hide') {
+      this.hide()
+    } else if (meta === 'show') {
+      this.updatePosition()
+      this.show()
     }
   }
 
